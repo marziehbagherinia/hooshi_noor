@@ -1,0 +1,36 @@
+FROM php:8.2-fpm
+
+USER root
+
+# If opcache.ini exists, modify it:
+RUN if [ -f $PHP_INI_DIR/conf.d/opcache.ini ]; then \
+    sed -i 's/opcache.enable=1/opcache.enable=0/' $PHP_INI_DIR/conf.d/opcache.ini; \
+fi
+
+# If not, create it:
+RUN if [ ! -f $PHP_INI_DIR/conf.d/opcache.ini ]; then \
+    echo "opcache.enable=0" > $PHP_INI_DIR/conf.d/opcache.ini; \
+fi
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    libicu-dev \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    git \
+    cron \
+    zip \
+    unzip \
+    autoconf \
+    build-essential \
+    nano
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN pecl install redis
+RUN docker-php-ext-install mysqli pdo pdo_mysql bcmath sockets
+RUN docker-php-ext-enable redis

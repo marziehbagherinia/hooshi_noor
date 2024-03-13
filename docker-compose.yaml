@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  hooshi_app:
+    build:
+      context: .
+      dockerfile: ./.pro/dockerfile-app
+    container_name: hooshi-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+
+  hooshi_service:
+    build:
+      context: .
+      dockerfile: ./.pro/dockerfile-server
+    container_name: hooshi-service
+    working_dir: /app
+    ports:
+      - "8013:80"
+    volumes:
+      - ./:/app
+      - ./.pro/server-nginx.conf:/etc/nginx/conf.d/default.conf
+
+networks:
+  default:
+    external:
+      name: local_network
